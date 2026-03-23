@@ -7,7 +7,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <title>Golden Ring: International Tournament Edition</title>
     
-    <!-- خطوط وأيقونات -->
+    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -52,7 +52,7 @@
             padding: 20px;
         }
 
-        /* خلفية متحركة */
+        /* Animated background */
         body::before {
             content: '';
             position: absolute;
@@ -72,7 +72,7 @@
             50% { opacity: 1; }
         }
 
-        /* حاوية اللعبة */
+        /* Game container */
         .game-wrapper {
             width: 100%;
             max-width: 1400px;
@@ -85,9 +85,12 @@
             position: relative;
             overflow: hidden;
             margin: 0 auto;
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* شاشة اختيار المستوى */
+        /* Level selection screen */
         .level-screen {
             position: absolute;
             top: 0;
@@ -103,6 +106,7 @@
             justify-content: center;
             border-radius: 24px;
             padding: 2rem;
+            overflow-y: auto;
         }
 
         .level-screen.hidden {
@@ -136,6 +140,7 @@
             gap: 2rem;
             width: 100%;
             max-width: 1000px;
+            margin: 0 auto;
         }
 
         .level-card {
@@ -211,7 +216,7 @@
             line-height: 1.8;
         }
 
-        /* رأس اللعبة */
+        /* Game header */
         .game-header {
             display: flex;
             justify-content: space-between;
@@ -258,7 +263,7 @@
             50% { opacity: 0.5; }
         }
 
-        /* شريط التقدم */
+        /* Progress bar */
         .progress-container {
             width: 100%;
             height: 8px;
@@ -277,7 +282,7 @@
             box-shadow: 0 0 10px var(--primary);
         }
 
-        /* شبكة الأيادي */
+        /* Hands grid */
         .hands-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -370,7 +375,20 @@
             transform: rotate(180deg);
         }
 
-        /* لوحة التحكم */
+        /* Number below the hand */
+        .hand-number {
+            display: block;
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            font-family: 'Orbitron', monospace;
+            color: var(--gold);
+            margin-top: 0.8rem;
+            text-shadow: 0 0 8px var(--gold-glow);
+            letter-spacing: 2px;
+        }
+
+        /* Control panel */
         .control-panel {
             display: flex;
             justify-content: center;
@@ -423,20 +441,10 @@
             box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
         }
 
-        .btn-lock:hover:not(:disabled) {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.6);
-        }
-
         .btn-eliminate {
             background: linear-gradient(135deg, #f97316, #c2410c);
             color: white;
             box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4);
-        }
-
-        .btn-eliminate:hover:not(:disabled) {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(249, 115, 22, 0.6);
         }
 
         .btn-reveal {
@@ -448,10 +456,9 @@
         .btn-reset {
             background: linear-gradient(135deg, #64748b, #475569);
             color: white;
-            display: none;
         }
 
-        /* رسائل النتيجة */
+        /* Result overlay */
         .result-overlay {
             position: fixed;
             top: 0;
@@ -500,7 +507,7 @@
         .lose .result-icon { color: var(--danger); text-shadow: 0 0 50px var(--danger); }
         .lose .result-title { color: var(--danger); }
 
-        /* Canvas للجزيئات */
+        /* Particle canvas */
         #particleCanvas {
             position: fixed;
             top: 0;
@@ -511,7 +518,7 @@
             z-index: 150;
         }
 
-        /* زر الصوت */
+        /* Audio toggle */
         .audio-toggle {
             position: fixed;
             top: 20px;
@@ -537,7 +544,7 @@
             box-shadow: 0 0 20px var(--gold-glow);
         }
 
-        /* تجاوب الشاشات */
+        /* Responsive adjustments */
         @media (max-width: 1024px) {
             .hands-grid {
                 grid-template-columns: repeat(4, 1fr);
@@ -553,6 +560,7 @@
             }
             .hand-card { min-height: 100px; }
             .hand-icon { font-size: 2.5rem; }
+            .hand-number { font-size: 1.4rem; margin-top: 0.5rem; }
             .btn { padding: 0.8rem 1.5rem; font-size: 0.9rem; }
             .game-stats { gap: 1rem; }
             .stat-value { font-size: 1.2rem; }
@@ -566,19 +574,25 @@
             .level-title { font-size: 1.8rem; }
             .game-header { flex-direction: column; text-align: center; }
         }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
     </style>
 </head>
 <body>
 
     <canvas id="particleCanvas"></canvas>
     
-    <!-- زر التحكم بالصوت -->
+    <!-- Audio toggle button -->
     <button class="audio-toggle" id="audioToggle" onclick="toggleAudio()">
         <i class="fa-solid fa-volume-high"></i>
     </button>
 
     <div class="game-wrapper">
-        <!-- شاشة اختيار المستوى -->
+        <!-- Level Selection Screen -->
         <div class="level-screen" id="levelScreen">
             <h1 class="level-title"><i class="fa-solid fa-gem"></i> GOLDEN RING</h1>
             <div class="level-cards">
@@ -612,7 +626,7 @@
             </div>
         </div>
 
-        <!-- واجهة اللعبة -->
+        <!-- Game Interface -->
         <div class="game-header">
             <div class="game-title"><i class="fa-solid fa-gem"></i> TOURNAMENT</div>
             <div class="game-stats">
@@ -653,7 +667,7 @@
         </div>
     </div>
 
-    <!-- شاشة النتيجة -->
+    <!-- Result Overlay -->
     <div class="result-overlay" id="resultOverlay">
         <div class="result-icon" id="resultIcon"></div>
         <div class="result-title" id="resultTitle"></div>
@@ -664,14 +678,14 @@
     </div>
 
     <script>
-        // === إعدادات اللعبة ===
+        // === Game Settings ===
         const LEVELS = {
             beginner: { hands: 8, time: null, scoreMultiplier: 1 },
             pro: { hands: 12, time: 45, scoreMultiplier: 2 },
             legendary: { hands: 16, time: 30, scoreMultiplier: 3 }
         };
 
-        // === متغيرات الحالة ===
+        // === Game State ===
         let currentLevel = 'beginner';
         let winningHandIndex = -1;
         let selectedHandIndex = -1;
@@ -682,7 +696,7 @@
         let isGameOver = false;
         let audioEnabled = true;
 
-        // === عناصر DOM ===
+        // === DOM Elements ===
         const elements = {
             levelScreen: document.getElementById('levelScreen'),
             handsGrid: document.getElementById('handsGrid'),
@@ -702,7 +716,7 @@
             audioToggle: document.getElementById('audioToggle')
         };
 
-        // === نظام الصوت (Web Audio API) ===
+        // === Audio Engine ===
         class AudioEngine {
             constructor() {
                 this.ctx = null;
@@ -711,7 +725,6 @@
 
             init() {
                 if (this.initialized) return;
-                
                 try {
                     this.ctx = new (window.AudioContext || window.webkitAudioContext)();
                     this.initialized = true;
@@ -728,20 +741,15 @@
 
             playTone(freq, type, duration, volume = 0.3) {
                 if (!audioEnabled || !this.ctx || !this.initialized) return;
-                
                 try {
                     const osc = this.ctx.createOscillator();
                     const gain = this.ctx.createGain();
-                    
                     osc.type = type;
                     osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-                    
                     gain.gain.setValueAtTime(volume, this.ctx.currentTime);
                     gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
-                    
                     osc.connect(gain);
                     gain.connect(this.ctx.destination);
-                    
                     osc.start();
                     osc.stop(this.ctx.currentTime + duration);
                 } catch (e) {
@@ -749,42 +757,29 @@
                 }
             }
 
-            playClick() {
-                this.playTone(800, 'sine', 0.1, 0.2);
-            }
-
-            playSelect() {
-                this.playTone(1200, 'sine', 0.15, 0.3);
-            }
-
+            playClick() { this.playTone(800, 'sine', 0.1, 0.2); }
+            playSelect() { this.playTone(1200, 'sine', 0.15, 0.3); }
             playEliminate() {
                 this.playTone(400, 'square', 0.3, 0.2);
                 setTimeout(() => this.playTone(300, 'square', 0.3, 0.2), 100);
             }
-
             playLock() {
                 this.playTone(600, 'triangle', 0.2, 0.3);
                 setTimeout(() => this.playTone(800, 'triangle', 0.2, 0.3), 150);
             }
-
             playWin() {
                 const notes = [523, 659, 784, 1046, 784, 1046];
                 notes.forEach((freq, i) => {
                     setTimeout(() => this.playTone(freq, 'sine', 0.3, 0.4), i * 150);
                 });
             }
-
             playLose() {
                 const notes = [400, 350, 300, 250];
                 notes.forEach((freq, i) => {
                     setTimeout(() => this.playTone(freq, 'sawtooth', 0.4, 0.3), i * 200);
                 });
             }
-
-            playTimeWarning() {
-                this.playTone(1000, 'square', 0.1, 0.2);
-            }
-
+            playTimeWarning() { this.playTone(1000, 'square', 0.1, 0.2); }
             playTimeReset() {
                 this.playTone(600, 'sine', 0.2, 0.3);
                 setTimeout(() => this.playTone(800, 'sine', 0.2, 0.3), 100);
@@ -794,13 +789,12 @@
 
         const audio = new AudioEngine();
 
-        // === تبديل الصوت ===
+        // === Toggle Audio ===
         function toggleAudio() {
             audioEnabled = !audioEnabled;
             elements.audioToggle.innerHTML = audioEnabled 
                 ? '<i class="fa-solid fa-volume-high"></i>' 
                 : '<i class="fa-solid fa-volume-xmark"></i>';
-            
             if (audioEnabled) {
                 audio.init();
                 audio.resume();
@@ -808,7 +802,7 @@
             }
         }
 
-        // === نظام الجزيئات (Particles) ===
+        // === Particle System ===
         class ParticleSystem {
             constructor() {
                 this.canvas = elements.particleCanvas;
@@ -858,25 +852,19 @@
 
             animate() {
                 if (this.particles.length === 0) return;
-                
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-                
                 this.particles = this.particles.filter(p => {
                     p.x += p.vx;
                     p.y += p.vy;
                     p.vy += 0.3;
                     p.life -= 0.01;
-                    
                     if (p.rotation !== undefined) {
                         p.rotation += p.rotationSpeed;
                     }
-                    
                     if (p.life <= 0 || p.y > this.canvas.height) return false;
-                    
                     this.ctx.save();
                     this.ctx.globalAlpha = p.life;
                     this.ctx.fillStyle = p.color;
-                    
                     if (p.rotation !== undefined) {
                         this.ctx.translate(p.x, p.y);
                         this.ctx.rotate(p.rotation * Math.PI / 180);
@@ -886,11 +874,9 @@
                         this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
                         this.ctx.fill();
                     }
-                    
                     this.ctx.restore();
                     return true;
                 });
-                
                 if (this.particles.length > 0) {
                     requestAnimationFrame(() => this.animate());
                 }
@@ -899,28 +885,22 @@
 
         const particles = new ParticleSystem();
 
-        // === منطق اللعبة ===
+        // === Game Logic ===
         function showLevelScreen() {
             stopTimer();
             elements.levelScreen.classList.remove('hidden');
             elements.resultOverlay.classList.remove('show');
-            
-            // إصلاح: إعادة إظهار جميع الأزرار
             elements.btnLock.style.display = 'flex';
             elements.btnEliminate.style.display = 'flex';
             elements.btnReveal.style.display = 'flex';
-            elements.btnReset.style.display = 'none';
-            
+            elements.btnReset.style.display = 'flex';
             isGameOver = false;
-            
-            // تنظيف اللوحة
             elements.handsGrid.innerHTML = '';
             elements.progressBar.style.width = '100%';
             elements.timerDisplay.classList.remove('warning', 'danger');
         }
 
         function startGame(level) {
-            // تهيئة الصوت عند أول تفاعل من المستخدم
             audio.init();
             audio.resume();
             audio.playClick();
@@ -932,7 +912,6 @@
             elements.levelDisplay.textContent = level.toUpperCase();
             elements.btnReset.style.display = 'flex';
             
-            // إعادة تعيين المتغيرات
             winningHandIndex = Math.floor(Math.random() * config.hands);
             selectedHandIndex = -1;
             eliminatedHands = [];
@@ -943,10 +922,8 @@
             elements.scoreDisplay.textContent = '0';
             updateTimerDisplay();
             
-            // إنشاء الأيادي
             createHands(config.hands);
             
-            // بدء المؤقت
             if (config.time) {
                 startTimer();
             }
@@ -956,12 +933,9 @@
 
         function createHands(count) {
             elements.handsGrid.innerHTML = '';
-            
-            // تحديد عدد الأعمدة بناءً على عدد الأيادي
             let columns = 4;
             if (count === 12) columns = 4;
             if (count === 16) columns = 4;
-            
             elements.handsGrid.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
             
             for (let i = 0; i < count; i++) {
@@ -982,8 +956,15 @@
                     content.innerHTML = '<i class="fa-regular fa-circle" style="color: #475569;"></i>';
                 }
                 
+                // Add number below the hand (in English numerals)
+                const numberSpan = document.createElement('span');
+                numberSpan.className = 'hand-number';
+                numberSpan.textContent = (i + 1).toString();
+                
                 handCard.appendChild(icon);
+                handCard.appendChild(numberSpan);
                 handCard.appendChild(content);
+                
                 elements.handsGrid.appendChild(handCard);
             }
         }
@@ -1025,7 +1006,6 @@
                 elements.timerDisplay.classList.remove('warning', 'danger');
                 return;
             }
-            
             const minutes = Math.floor(timeLeft / 60);
             const seconds = timeLeft % 60;
             elements.timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
@@ -1039,7 +1019,6 @@
 
         function selectHand(index) {
             if (isGameOver || eliminatedHands.includes(index)) return;
-            
             audio.playSelect();
             selectedHandIndex = index;
             
@@ -1063,7 +1042,6 @@
 
         function lockSelection() {
             if (selectedHandIndex === -1 || isGameOver) return;
-            
             audio.playLock();
             revealResult();
         }
@@ -1084,27 +1062,23 @@
             handElement.classList.add('eliminated');
             eliminatedHands.push(selectedHandIndex);
             
-            // زيادة النقاط
             score += 100 * LEVELS[currentLevel].scoreMultiplier;
             elements.scoreDisplay.textContent = score;
             
-            // *** تجديد الوقت للمستويات Pro و Legendary ***
+            // === ORIGINAL TIME RESET BEHAVIOR (FULL RESET) ===
             const config = LEVELS[currentLevel];
             if (config.time !== null) {
-                timeLeft = config.time; // إعادة تعيين الوقت للقيمة الأصلية
-                audio.playTimeReset(); // تشغيل صوت تجديد الوقت
+                timeLeft = config.time; // Reset time fully
+                audio.playTimeReset();
                 updateTimerDisplay();
                 elements.progressBar.style.width = '100%';
             }
             
-            // إعادة تعيين التحديد
             selectedHandIndex = -1;
             document.querySelectorAll('.hand-card').forEach(c => c.classList.remove('selected'));
             resetButtons();
             
-            // التحقق من الفوز التلقائي
             const remaining = config.hands - eliminatedHands.length;
-            
             if (remaining === 1) {
                 const remainingIndex = Array.from({length: config.hands}, (_, i) => i)
                     .find(i => !eliminatedHands.includes(i));
@@ -1151,7 +1125,6 @@
             isGameOver = true;
             stopTimer();
             showResult(win, win ? 'VICTORY!' : 'GAME OVER', message);
-            
             elements.btnLock.style.display = 'none';
             elements.btnEliminate.style.display = 'none';
             elements.btnReveal.style.display = 'none';
@@ -1174,18 +1147,7 @@
             }
         }
 
-        // إضافة أنيميشن الاهتزاز
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes shake {
-                0%, 100% { transform: translateX(0); }
-                25% { transform: translateX(-10px); }
-                75% { transform: translateX(10px); }
-            }
-        `;
-        document.head.appendChild(style);
-
-        // تهيئة أولية
+        // Initialize
         window.onload = () => {
             showLevelScreen();
         };
