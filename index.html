@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Golden Ring: International Tournament Edition</title>
+    
+    <!-- خطوط وأيقونات -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-dark: #020617;
+            --bg-panel: #1e293b;
+            --primary: #3b82f6;
+            --gold: #fbbf24;
+            --gold-glow: rgba(251, 191, 36, 0.5);
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f97316;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: radial-gradient(circle at center, #1e293b 0%, #020617 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* خلفية متحركة */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(251, 191, 36, 0.1) 0%, transparent 50%);
+            z-index: -1;
+            animation: pulse 10s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* حاوية اللعبة */
+        .game-wrapper {
+            width: 95%;
+            max-width: 1400px;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 0 100px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* شاشة اختيار المستوى */
+        .level-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(2, 6, 23, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 24px;
+        }
+
+        .level-screen.hidden {
+            display: none;
+        }
+
+        .level-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            color: var(--gold);
+            text-shadow: 0 0 30px var(--gold-glow);
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        .level-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            width: 90%;
+            max-width: 1000px;
+        }
+
+        .level-card {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .level-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--gold));
+            transform: scaleX(0);
+            transition: transform 0.4s;
+        }
+
+        .level-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .level-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--gold);
+            box-shadow: 0 20px 40px rgba(251, 191, 36, 0.2);
+        }
+
+        .level-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .level-card.pro .level-icon { color: var(--warning); }
+        .level-card.legendary .level-icon { color: var(--danger); }
+
+        .level-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .level-info {
+            color: var(--text-muted);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        /* رأس اللعبة */
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .game-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            color: var(--gold);
+            text-shadow: 0 0 20px var(--gold-glow);
+        }
+
+        .game-stats {
+            display: flex;
+            gap: 2rem;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .timer.warning { color: var(--warning); animation: blink 0.5s infinite; }
+        .timer.danger { color: var(--danger); animation: blink 0.3s infinite; }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* شريط التقدم */
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--gold));
+            border-radius: 3px;
+            transition: width 0.3s;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        /* شبكة الأيادي */
+        .hands-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin-bottom: 2rem;
+        }
+
+        .hand-card {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border-radius: 16px;
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hand-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .hand-card:hover::after {
+            opacity: 1;
+        }
+
+        .hand-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+        }
+
+        .hand-card.selected {
+            border-color: var(--gold);
+            box-shadow: 0 0 30px var(--gold-glow);
+            transform: scale(1.05);
+            z-index: 10;
+        }
+
+        .hand-card.eliminated {
+            animation: eliminate 0.5s forwards;
+            pointer-events: none;
+        }
+
+        @keyframes eliminate {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.5; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        .hand-icon {
+            font-size: 3rem;
+            color: var(--text-muted);
+            transition: all 0.5s;
+        }
+
+        .hand-card.selected .hand-icon {
+            color: var(--gold);
+            transform: scale(1.1);
+        }
+
+        .hand-content {
+            position: absolute;
+            font-size: 2.5rem;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.3s;
+        }
+
+        .hand-card.open .hand-content {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .hand-card.open .hand-icon {
+            opacity: 0;
+            transform: rotate(180deg);
+        }
+
+        /* لوحة التحكم */
+        .control-panel {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-family: 'Orbitron', sans-serif;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            filter: grayscale(100%);
+        }
+
+        .btn-lock {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-lock:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.6);
+        }
+
+        .btn-eliminate {
+            background: linear-gradient(135deg, #f97316, #c2410c);
+            color: white;
+            box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4);
+        }
+
+        .btn-eliminate:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(249, 115, 22, 0.6);
+        }
+
+        .btn-reveal {
+            background: linear-gradient(135deg, #fbbf24, #d97706);
+            color: #020617;
+            box-shadow: 0 4px 15px rgba(251, 191, 36, 0.4);
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, #64748b, #475569);
+            color: white;
+            display: none;
+        }
+
+        /* رسائل النتيجة */
+        .result-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(2, 6, 23, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .result-overlay.show {
+            display: flex;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .result-icon {
+            font-size: 6rem;
+            margin-bottom: 1rem;
+        }
+
+        .result-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .result-score {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        .win .result-icon { color: var(--success); text-shadow: 0 0 50px var(--success); }
+        .win .result-title { color: var(--success); }
+        .lose .result-icon { color: var(--danger); text-shadow: 0 0 50px var(--danger); }
+        .lose .result-title { color: var(--danger); }
+
+        /* Canvas للجزيئات */
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 150;
+        }
+
+        /* زر الصوت */
+        .audio-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 300;
+            background: var(--bg-panel);
+            border: 2px solid var(--gold);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gold);
+            font-size: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .audio-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px var(--gold-glow);
+        }
+
+        /* تجاوب الشاشات */
+        @media (max-width: 768px) {
+            .level-title { font-size: 2rem; }
+            .game-title { font-size: 1.5rem; }
+            .hands-grid { grid-template-columns: repeat(2, 1fr); }
+            .btn { padding: 0.8rem 1.5rem; font-size: 0.9rem; }
+            .game-stats { gap: 1rem; }
+            .stat-value { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="particleCanvas"></canvas>
+    
+    <!-- زر التحكم بالصوت -->
+    <button class="audio-toggle" id="audioToggle" onclick="toggleAudio()">
+        <i class="fa-solid fa-volume-high"></i>
+    </button>
+
+    <div class="game-wrapper">
+        <!-- شاشة اختيار المستوى -->
+        <div class="level-screen" id="levelScreen">
+            <h1 class="level-title"><i class="fa-solid fa-gem"></i> GOLDEN RING</h1>
+            <div class="level-cards">
+                <div class="level-card" onclick="startGame('beginner')">
+                    <i class="fa-solid fa-medal level-icon"></i>
+                    <div class="level-name">BEGINNER</div>
+                    <div class="level-info">
+                        8 Hands<br>
+                        No Time Limit<br>
+                        Perfect for learning
+                    </div>
+                </div>
+                <div class="level-card pro" onclick="startGame('pro')">
+                    <i class="fa-solid fa-trophy level-icon"></i>
+                    <div class="level-name">PROFESSIONAL</div>
+                    <div class="level-info">
+                        12 Hands<br>
+                        45 Seconds<br>
+                        For experienced players
+                    </div>
+                </div>
+                <div class="level-card legendary" onclick="startGame('legendary')">
+                    <i class="fa-solid fa-crown level-icon"></i>
+                    <div class="level-name">LEGENDARY</div>
+                    <div class="level-info">
+                        16 Hands<br>
+                        30 Seconds<br>
+                        Ultimate challenge
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- واجهة اللعبة -->
+        <div class="game-header">
+            <div class="game-title"><i class="fa-solid fa-gem"></i> TOURNAMENT</div>
+            <div class="game-stats">
+                <div class="stat-item">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span class="stat-value" id="levelDisplay">BEGINNER</span>
+                </div>
+                <div class="stat-item">
+                    <i class="fa-solid fa-clock"></i>
+                    <span class="stat-value timer" id="timerDisplay">--:--</span>
+                </div>
+                <div class="stat-item">
+                    <i class="fa-solid fa-star"></i>
+                    <span class="stat-value" id="scoreDisplay">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar" style="width: 100%"></div>
+        </div>
+
+        <div class="hands-grid" id="handsGrid"></div>
+
+        <div class="control-panel">
+            <button class="btn btn-lock" id="btnLock" disabled onclick="lockSelection()">
+                <i class="fa-solid fa-lock"></i> Lock
+            </button>
+            <button class="btn btn-eliminate" id="btnEliminate" disabled onclick="eliminateHand()">
+                <i class="fa-solid fa-trash"></i> Empty
+            </button>
+            <button class="btn btn-reveal" id="btnReveal" disabled onclick="revealResult()">
+                <i class="fa-solid fa-eye"></i> Reveal
+            </button>
+            <button class="btn btn-reset" id="btnReset" onclick="showLevelScreen()">
+                <i class="fa-solid fa-house"></i> Menu
+            </button>
+        </div>
+    </div>
+
+    <!-- شاشة النتيجة -->
+    <div class="result-overlay" id="resultOverlay">
+        <div class="result-icon" id="resultIcon"></div>
+        <div class="result-title" id="resultTitle"></div>
+        <div class="result-score" id="resultScore"></div>
+        <button class="btn btn-reset" style="display: flex;" onclick="showLevelScreen()">
+            <i class="fa-solid fa-house"></i> Main Menu
+        </button>
+    </div>
+
+    <script>
+        // === إعدادات اللعبة ===
+        const LEVELS = {
+            beginner: { hands: 8, time: null, scoreMultiplier: 1 },
+            pro: { hands: 12, time: 45, scoreMultiplier: 2 },
+            legendary: { hands: 16, time: 30, scoreMultiplier: 3 }
+        };
+
+        // === متغيرات الحالة ===
+        let currentLevel = 'beginner';
+        let winningHandIndex = -1;
+        let selectedHandIndex = -1;
+        let eliminatedHands = [];
+        let score = 0;
+        let timeLeft = 0;
+        let timerInterval = null;
+        let isGameOver = false;
+        let audioEnabled = true;
+
+        // === عناصر DOM ===
+        const elements = {
+            levelScreen: document.getElementById('levelScreen'),
+            handsGrid: document.getElementById('handsGrid'),
+            btnLock: document.getElementById('btnLock'),
+            btnEliminate: document.getElementById('btnEliminate'),
+            btnReveal: document.getElementById('btnReveal'),
+            btnReset: document.getElementById('btnReset'),
+            timerDisplay: document.getElementById('timerDisplay'),
+            scoreDisplay: document.getElementById('scoreDisplay'),
+            levelDisplay: document.getElementById('levelDisplay'),
+            progressBar: document.getElementById('progressBar'),
+            resultOverlay: document.getElementById('resultOverlay'),
+            resultIcon: document.getElementById('resultIcon'),
+            resultTitle: document.getElementById('resultTitle'),
+            resultScore: document.getElementById('resultScore'),
+            particleCanvas: document.getElementById('particleCanvas'),
+            audioToggle: document.getElementById('audioToggle')
+        };
+
+        // === نظام الصوت (Web Audio API) - تم الإصلاح ===
+        class AudioEngine {
+            constructor() {
+                this.ctx = null;
+                this.initialized = false;
+            }
+
+            init() {
+                if (this.initialized) return;
+                
+                try {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    this.initialized = true;
+                } catch (e) {
+                    console.log('Audio not supported');
+                }
+            }
+
+            resume() {
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            playTone(freq, type, duration, volume = 0.3) {
+                if (!audioEnabled || !this.ctx || !this.initialized) return;
+                
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    
+                    gain.gain.setValueAtTime(volume, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
+                    
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch (e) {
+                    console.log('Audio play error:', e);
+                }
+            }
+
+            playClick() {
+                this.playTone(800, 'sine', 0.1, 0.2);
+            }
+
+            playSelect() {
+                this.playTone(1200, 'sine', 0.15, 0.3);
+            }
+
+            playEliminate() {
+                this.playTone(400, 'square', 0.3, 0.2);
+                setTimeout(() => this.playTone(300, 'square', 0.3, 0.2), 100);
+            }
+
+            playLock() {
+                this.playTone(600, 'triangle', 0.2, 0.3);
+                setTimeout(() => this.playTone(800, 'triangle', 0.2, 0.3), 150);
+            }
+
+            playWin() {
+                const notes = [523, 659, 784, 1046, 784, 1046];
+                notes.forEach((freq, i) => {
+                    setTimeout(() => this.playTone(freq, 'sine', 0.3, 0.4), i * 150);
+                });
+            }
+
+            playLose() {
+                const notes = [400, 350, 300, 250];
+                notes.forEach((freq, i) => {
+                    setTimeout(() => this.playTone(freq, 'sawtooth', 0.4, 0.3), i * 200);
+                });
+            }
+
+            playTimeWarning() {
+                this.playTone(1000, 'square', 0.1, 0.2);
+            }
+        }
+
+        const audio = new AudioEngine();
+
+        // === تبديل الصوت ===
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            elements.audioToggle.innerHTML = audioEnabled 
+                ? '<i class="fa-solid fa-volume-high"></i>' 
+                : '<i class="fa-solid fa-volume-xmark"></i>';
+            
+            if (audioEnabled) {
+                audio.init();
+                audio.resume();
+                audio.playClick();
+            }
+        }
+
+        // === نظام الجزيئات (Particles) ===
+        class ParticleSystem {
+            constructor() {
+                this.canvas = elements.particleCanvas;
+                this.ctx = this.canvas.getContext('2d');
+                this.particles = [];
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+            }
+
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+
+            createExplosion(x, y, color, count = 100) {
+                for (let i = 0; i < count; i++) {
+                    this.particles.push({
+                        x: x,
+                        y: y,
+                        vx: (Math.random() - 0.5) * 15,
+                        vy: (Math.random() - 0.5) * 15,
+                        life: 1,
+                        color: color,
+                        size: Math.random() * 8 + 2
+                    });
+                }
+                this.animate();
+            }
+
+            createConfetti() {
+                const colors = ['#fbbf24', '#3b82f6', '#10b981', '#ef4444', '#f97316'];
+                for (let i = 0; i < 200; i++) {
+                    this.particles.push({
+                        x: Math.random() * this.canvas.width,
+                        y: -20,
+                        vx: (Math.random() - 0.5) * 5,
+                        vy: Math.random() * 10 + 5,
+                        life: 1,
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        size: Math.random() * 10 + 5,
+                        rotation: Math.random() * 360,
+                        rotationSpeed: (Math.random() - 0.5) * 10
+                    });
+                }
+                this.animate();
+            }
+
+            animate() {
+                if (this.particles.length === 0) return;
+                
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                this.particles = this.particles.filter(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.3;
+                    p.life -= 0.01;
+                    
+                    if (p.rotation !== undefined) {
+                        p.rotation += p.rotationSpeed;
+                    }
+                    
+                    if (p.life <= 0 || p.y > this.canvas.height) return false;
+                    
+                    this.ctx.save();
+                    this.ctx.globalAlpha = p.life;
+                    this.ctx.fillStyle = p.color;
+                    
+                    if (p.rotation !== undefined) {
+                        this.ctx.translate(p.x, p.y);
+                        this.ctx.rotate(p.rotation * Math.PI / 180);
+                        this.ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
+                    } else {
+                        this.ctx.beginPath();
+                        this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+                    
+                    this.ctx.restore();
+                    return true;
+                });
+                
+                if (this.particles.length > 0) {
+                    requestAnimationFrame(() => this.animate());
+                }
+            }
+        }
+
+        const particles = new ParticleSystem();
+
+        // === منطق اللعبة ===
+        function showLevelScreen() {
+            stopTimer();
+            elements.levelScreen.classList.remove('hidden');
+            elements.resultOverlay.classList.remove('show');
+            
+            // إصلاح: إعادة إظهار جميع الأزرار
+            elements.btnLock.style.display = 'flex';
+            elements.btnEliminate.style.display = 'flex';
+            elements.btnReveal.style.display = 'flex';
+            elements.btnReset.style.display = 'none';
+            
+            isGameOver = false;
+            
+            // تنظيف اللوحة
+            elements.handsGrid.innerHTML = '';
+            elements.progressBar.style.width = '100%';
+            elements.timerDisplay.classList.remove('warning', 'danger');
+        }
+
+        function startGame(level) {
+            // تهيئة الصوت عند أول تفاعل من المستخدم
+            audio.init();
+            audio.resume();
+            audio.playClick();
+            
+            currentLevel = level;
+            const config = LEVELS[level];
+            
+            elements.levelScreen.classList.add('hidden');
+            elements.levelDisplay.textContent = level.toUpperCase();
+            elements.btnReset.style.display = 'flex';
+            
+            // إعادة تعيين المتغيرات
+            winningHandIndex = Math.floor(Math.random() * config.hands);
+            selectedHandIndex = -1;
+            eliminatedHands = [];
+            score = 0;
+            isGameOver = false;
+            timeLeft = config.time || 0;
+            
+            elements.scoreDisplay.textContent = '0';
+            updateTimerDisplay();
+            
+            // إنشاء الأيادي
+            createHands(config.hands);
+            
+            // بدء المؤقت
+            if (config.time) {
+                startTimer();
+            }
+            
+            resetButtons();
+        }
+
+        function createHands(count) {
+            elements.handsGrid.innerHTML = '';
+            elements.handsGrid.style.gridTemplateColumns = `repeat(${count <= 8 ? 4 : count <= 12 ? 6 : 8}, 1fr)`;
+            
+            for (let i = 0; i < count; i++) {
+                const handCard = document.createElement('div');
+                handCard.className = 'hand-card';
+                handCard.id = `hand-${i}`;
+                handCard.dataset.index = i;
+                handCard.onclick = () => selectHand(i);
+                
+                const icon = document.createElement('i');
+                icon.className = 'fa-solid fa-hand-fist hand-icon';
+                
+                const content = document.createElement('div');
+                content.className = 'hand-content';
+                if (i === winningHandIndex) {
+                    content.innerHTML = '<i class="fa-solid fa-ring ring-icon" style="color: var(--gold); filter: drop-shadow(0 0 10px var(--gold));"></i>';
+                } else {
+                    content.innerHTML = '<i class="fa-regular fa-circle" style="color: #475569;"></i>';
+                }
+                
+                handCard.appendChild(icon);
+                handCard.appendChild(content);
+                elements.handsGrid.appendChild(handCard);
+            }
+        }
+
+        function startTimer() {
+            stopTimer();
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                const totalTime = LEVELS[currentLevel].time;
+                const progress = (timeLeft / totalTime) * 100;
+                elements.progressBar.style.width = `${progress}%`;
+                
+                if (timeLeft <= 10) {
+                    elements.timerDisplay.classList.add('danger');
+                    elements.timerDisplay.classList.remove('warning');
+                    if (timeLeft % 2 === 0) audio.playTimeWarning();
+                } else if (timeLeft <= 20) {
+                    elements.timerDisplay.classList.add('warning');
+                }
+                
+                if (timeLeft <= 0) {
+                    gameOver(false, 'TIME EXPIRED!');
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function updateTimerDisplay() {
+            if (LEVELS[currentLevel].time === null) {
+                elements.timerDisplay.textContent = '∞';
+                elements.timerDisplay.classList.remove('warning', 'danger');
+                return;
+            }
+            
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            elements.timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function resetButtons() {
+            elements.btnLock.disabled = true;
+            elements.btnEliminate.disabled = true;
+            elements.btnReveal.disabled = true;
+        }
+
+        function selectHand(index) {
+            if (isGameOver || eliminatedHands.includes(index)) return;
+            
+            audio.playSelect();
+            selectedHandIndex = index;
+            
+            document.querySelectorAll('.hand-card').forEach((card, i) => {
+                card.classList.toggle('selected', i === index);
+            });
+            
+            elements.btnLock.disabled = false;
+            elements.btnEliminate.disabled = false;
+            
+            const config = LEVELS[currentLevel];
+            const remaining = config.hands - eliminatedHands.length;
+            if (remaining === 1) {
+                elements.btnReveal.disabled = false;
+                elements.btnLock.disabled = true;
+                elements.btnEliminate.disabled = true;
+            } else {
+                elements.btnReveal.disabled = true;
+            }
+        }
+
+        function lockSelection() {
+            if (selectedHandIndex === -1 || isGameOver) return;
+            
+            audio.playLock();
+            revealResult();
+        }
+
+        function eliminateHand() {
+            if (selectedHandIndex === -1 || isGameOver) return;
+            
+            const handElement = document.getElementById(`hand-${selectedHandIndex}`);
+            
+            if (selectedHandIndex === winningHandIndex) {
+                audio.playLose();
+                handElement.classList.add('open');
+                gameOver(false, 'CRITICAL ERROR! You eliminated the Ring!');
+                return;
+            }
+            
+            audio.playEliminate();
+            handElement.classList.add('eliminated');
+            eliminatedHands.push(selectedHandIndex);
+            
+            score += 100 * LEVELS[currentLevel].scoreMultiplier;
+            elements.scoreDisplay.textContent = score;
+            
+            selectedHandIndex = -1;
+            document.querySelectorAll('.hand-card').forEach(c => c.classList.remove('selected'));
+            resetButtons();
+            
+            const config = LEVELS[currentLevel];
+            const remaining = config.hands - eliminatedHands.length;
+            
+            if (remaining === 1) {
+                const remainingIndex = Array.from({length: config.hands}, (_, i) => i)
+                    .find(i => !eliminatedHands.includes(i));
+                selectHand(remainingIndex);
+            }
+        }
+
+        function revealResult() {
+            if (isGameOver) return;
+            isGameOver = true;
+            stopTimer();
+            
+            document.querySelectorAll('.hand-card').forEach((card, index) => {
+                if (!eliminatedHands.includes(index)) {
+                    card.classList.add('open');
+                }
+            });
+            
+            const win = selectedHandIndex === winningHandIndex;
+            
+            if (win) {
+                const timeBonus = LEVELS[currentLevel].time ? timeLeft * 10 : 500;
+                const eliminationBonus = eliminatedHands.length * 50;
+                const finalScore = score + timeBonus + eliminationBonus;
+                
+                audio.playWin();
+                particles.createConfetti();
+                
+                document.body.style.animation = 'shake 0.5s';
+                setTimeout(() => document.body.style.animation = '', 500);
+                
+                showResult(true, 'VICTORY!', `Final Score: ${finalScore}`);
+            } else {
+                audio.playLose();
+                showResult(false, 'DEFEAT!', 'Better luck next time');
+            }
+            
+            elements.btnLock.style.display = 'none';
+            elements.btnEliminate.style.display = 'none';
+            elements.btnReveal.style.display = 'none';
+        }
+
+        function gameOver(win, message) {
+            isGameOver = true;
+            stopTimer();
+            showResult(win, win ? 'VICTORY!' : 'GAME OVER', message);
+            
+            elements.btnLock.style.display = 'none';
+            elements.btnEliminate.style.display = 'none';
+            elements.btnReveal.style.display = 'none';
+        }
+
+        function showResult(win, title, subtitle) {
+            elements.resultIcon.className = `result-icon fa-solid ${win ? 'fa-trophy' : 'fa-skull'}`;
+            elements.resultTitle.textContent = title;
+            elements.resultScore.textContent = subtitle;
+            elements.resultOverlay.className = `result-overlay show ${win ? 'win' : 'lose'}`;
+            
+            if (win) {
+                const rect = elements.resultIcon.getBoundingClientRect();
+                particles.createExplosion(
+                    rect.left + rect.width / 2,
+                    rect.top + rect.height / 2,
+                    '#fbbf24',
+                    150
+                );
+            }
+        }
+
+        // إضافة أنيميشن الاهتزاز
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-10px); }
+                75% { transform: translateX(10px); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // تهيئة أولية
+        window.onload = () => {
+            showLevelScreen();
+        };
+    </script>
+</body>
+</html>
