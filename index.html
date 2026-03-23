@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <title>Golden Ring: International Tournament Edition</title>
     
     <!-- خطوط وأيقونات -->
@@ -31,6 +33,12 @@
             -webkit-tap-highlight-color: transparent;
         }
 
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+        }
+
         body {
             font-family: 'Rajdhani', sans-serif;
             background: radial-gradient(circle at center, #1e293b 0%, #020617 100%);
@@ -40,8 +48,8 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            overflow-x: hidden;
             position: relative;
+            padding: 20px;
         }
 
         /* خلفية متحركة */
@@ -66,7 +74,7 @@
 
         /* حاوية اللعبة */
         .game-wrapper {
-            width: 95%;
+            width: 100%;
             max-width: 1400px;
             background: rgba(15, 23, 42, 0.8);
             backdrop-filter: blur(20px);
@@ -76,6 +84,7 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             position: relative;
             overflow: hidden;
+            margin: 0 auto;
         }
 
         /* شاشة اختيار المستوى */
@@ -85,7 +94,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(2, 6, 23, 0.95);
+            background: rgba(2, 6, 23, 0.98);
             backdrop-filter: blur(10px);
             z-index: 100;
             display: flex;
@@ -93,10 +102,11 @@
             align-items: center;
             justify-content: center;
             border-radius: 24px;
+            padding: 2rem;
         }
 
         .level-screen.hidden {
-            display: none;
+            display: none !important;
         }
 
         .level-title {
@@ -106,13 +116,25 @@
             text-shadow: 0 0 30px var(--gold-glow);
             margin-bottom: 3rem;
             text-align: center;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .level-cards {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 2rem;
-            width: 90%;
+            width: 100%;
             max-width: 1000px;
         }
 
@@ -120,12 +142,28 @@
             background: linear-gradient(145deg, #1e293b, #0f172a);
             border: 2px solid rgba(255, 255, 255, 0.1);
             border-radius: 20px;
-            padding: 2rem;
+            padding: 2.5rem 2rem;
             cursor: pointer;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             text-align: center;
             position: relative;
             overflow: hidden;
+            animation: fadeInUp 0.8s ease backwards;
+        }
+
+        .level-card:nth-child(1) { animation-delay: 0.1s; }
+        .level-card:nth-child(2) { animation-delay: 0.2s; }
+        .level-card:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .level-card::before {
@@ -145,15 +183,16 @@
         }
 
         .level-card:hover {
-            transform: translateY(-10px);
+            transform: translateY(-10px) scale(1.02);
             border-color: var(--gold);
-            box-shadow: 0 20px 40px rgba(251, 191, 36, 0.2);
+            box-shadow: 0 20px 40px rgba(251, 191, 36, 0.3);
         }
 
         .level-icon {
             font-size: 4rem;
             margin-bottom: 1rem;
             color: var(--primary);
+            display: block;
         }
 
         .level-card.pro .level-icon { color: var(--warning); }
@@ -161,14 +200,15 @@
 
         .level-name {
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
         }
 
         .level-info {
             color: var(--text-muted);
-            font-size: 1rem;
-            line-height: 1.6;
+            font-size: 1.1rem;
+            line-height: 1.8;
         }
 
         /* رأس اللعبة */
@@ -192,17 +232,22 @@
             display: flex;
             gap: 2rem;
             font-family: 'Orbitron', sans-serif;
+            flex-wrap: wrap;
         }
 
         .stat-item {
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
         }
 
         .stat-value {
             font-size: 1.5rem;
             color: var(--primary);
+            font-weight: 700;
         }
 
         .timer.warning { color: var(--warning); animation: blink 0.5s infinite; }
@@ -216,25 +261,26 @@
         /* شريط التقدم */
         .progress-container {
             width: 100%;
-            height: 6px;
+            height: 8px;
             background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
+            border-radius: 4px;
             margin-bottom: 2rem;
             overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
         }
 
         .progress-bar {
             height: 100%;
             background: linear-gradient(90deg, var(--primary), var(--gold));
-            border-radius: 3px;
-            transition: width 0.3s;
+            border-radius: 4px;
+            transition: width 0.3s ease;
             box-shadow: 0 0 10px var(--primary);
         }
 
         /* شبكة الأيادي */
         .hands-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 15px;
             margin-bottom: 2rem;
         }
@@ -252,6 +298,7 @@
             border: 2px solid transparent;
             position: relative;
             overflow: hidden;
+            min-height: 120px;
         }
 
         .hand-card::after {
@@ -411,7 +458,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(2, 6, 23, 0.9);
+            background: rgba(2, 6, 23, 0.95);
             backdrop-filter: blur(10px);
             z-index: 200;
             display: none;
@@ -482,6 +529,7 @@
             color: var(--gold);
             font-size: 1.5rem;
             transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
         .audio-toggle:hover {
@@ -490,13 +538,33 @@
         }
 
         /* تجاوب الشاشات */
+        @media (max-width: 1024px) {
+            .hands-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
         @media (max-width: 768px) {
-            .level-title { font-size: 2rem; }
+            .level-title { font-size: 2rem; margin-bottom: 2rem; }
             .game-title { font-size: 1.5rem; }
-            .hands-grid { grid-template-columns: repeat(2, 1fr); }
+            .hands-grid { 
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            .hand-card { min-height: 100px; }
+            .hand-icon { font-size: 2.5rem; }
             .btn { padding: 0.8rem 1.5rem; font-size: 0.9rem; }
             .game-stats { gap: 1rem; }
             .stat-value { font-size: 1.2rem; }
+            .level-cards { grid-template-columns: 1fr; }
+            body { padding: 10px; }
+            .game-wrapper { padding: 1.5rem; }
+        }
+
+        @media (max-width: 480px) {
+            .hands-grid { grid-template-columns: repeat(2, 1fr); }
+            .level-title { font-size: 1.8rem; }
+            .game-header { flex-direction: column; text-align: center; }
         }
     </style>
 </head>
@@ -528,7 +596,7 @@
                     <div class="level-name">PROFESSIONAL</div>
                     <div class="level-info">
                         12 Hands<br>
-                        45 Seconds<br>
+                        45 Seconds per Move<br>
                         For experienced players
                     </div>
                 </div>
@@ -537,7 +605,7 @@
                     <div class="level-name">LEGENDARY</div>
                     <div class="level-info">
                         16 Hands<br>
-                        30 Seconds<br>
+                        30 Seconds per Move<br>
                         Ultimate challenge
                     </div>
                 </div>
@@ -634,7 +702,7 @@
             audioToggle: document.getElementById('audioToggle')
         };
 
-        // === نظام الصوت (Web Audio API) - تم الإصلاح ===
+        // === نظام الصوت (Web Audio API) ===
         class AudioEngine {
             constructor() {
                 this.ctx = null;
@@ -715,6 +783,12 @@
 
             playTimeWarning() {
                 this.playTone(1000, 'square', 0.1, 0.2);
+            }
+
+            playTimeReset() {
+                this.playTone(600, 'sine', 0.2, 0.3);
+                setTimeout(() => this.playTone(800, 'sine', 0.2, 0.3), 100);
+                setTimeout(() => this.playTone(1000, 'sine', 0.3, 0.3), 200);
             }
         }
 
@@ -882,7 +956,13 @@
 
         function createHands(count) {
             elements.handsGrid.innerHTML = '';
-            elements.handsGrid.style.gridTemplateColumns = `repeat(${count <= 8 ? 4 : count <= 12 ? 6 : 8}, 1fr)`;
+            
+            // تحديد عدد الأعمدة بناءً على عدد الأيادي
+            let columns = 4;
+            if (count === 12) columns = 4;
+            if (count === 16) columns = 4;
+            
+            elements.handsGrid.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
             
             for (let i = 0; i < count; i++) {
                 const handCard = document.createElement('div');
@@ -915,14 +995,14 @@
                 updateTimerDisplay();
                 
                 const totalTime = LEVELS[currentLevel].time;
-                const progress = (timeLeft / totalTime) * 100;
+                const progress = totalTime ? (timeLeft / totalTime) * 100 : 100;
                 elements.progressBar.style.width = `${progress}%`;
                 
-                if (timeLeft <= 10) {
+                if (timeLeft <= 10 && timeLeft > 0) {
                     elements.timerDisplay.classList.add('danger');
                     elements.timerDisplay.classList.remove('warning');
                     if (timeLeft % 2 === 0) audio.playTimeWarning();
-                } else if (timeLeft <= 20) {
+                } else if (timeLeft <= 20 && timeLeft > 10) {
                     elements.timerDisplay.classList.add('warning');
                 }
                 
@@ -1004,14 +1084,25 @@
             handElement.classList.add('eliminated');
             eliminatedHands.push(selectedHandIndex);
             
+            // زيادة النقاط
             score += 100 * LEVELS[currentLevel].scoreMultiplier;
             elements.scoreDisplay.textContent = score;
             
+            // *** تجديد الوقت للمستويات Pro و Legendary ***
+            const config = LEVELS[currentLevel];
+            if (config.time !== null) {
+                timeLeft = config.time; // إعادة تعيين الوقت للقيمة الأصلية
+                audio.playTimeReset(); // تشغيل صوت تجديد الوقت
+                updateTimerDisplay();
+                elements.progressBar.style.width = '100%';
+            }
+            
+            // إعادة تعيين التحديد
             selectedHandIndex = -1;
             document.querySelectorAll('.hand-card').forEach(c => c.classList.remove('selected'));
             resetButtons();
             
-            const config = LEVELS[currentLevel];
+            // التحقق من الفوز التلقائي
             const remaining = config.hands - eliminatedHands.length;
             
             if (remaining === 1) {
