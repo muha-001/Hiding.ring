@@ -530,6 +530,187 @@
             box-shadow: 0 0 20px var(--gold-glow);
         }
 
+        /* Demo wallet */
+        .demo-wallet {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 300;
+            display: grid;
+            grid-template-columns: auto auto;
+            gap: 0.2rem 0.75rem;
+            align-items: center;
+            min-width: 190px;
+            padding: 0.7rem 0.9rem;
+            background: rgba(15, 23, 42, 0.94);
+            border: 1px solid rgba(251, 191, 36, 0.45);
+            border-radius: 14px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32);
+            backdrop-filter: blur(12px);
+        }
+
+        .wallet-label {
+            color: var(--text-muted);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 0.06em;
+        }
+
+        .wallet-balance {
+            grid-column: 1 / -1;
+            color: var(--gold);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.05rem;
+            letter-spacing: 0.03em;
+            text-shadow: 0 0 10px var(--gold-glow);
+        }
+
+        .wallet-reset {
+            grid-column: 2;
+            grid-row: 1;
+            justify-self: end;
+            padding: 0.25rem 0.55rem;
+            color: var(--text-muted);
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 6px;
+            cursor: pointer;
+            font: 600 0.7rem 'Rajdhani', sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        .wallet-reset:hover,
+        .wallet-reset:focus-visible {
+            color: var(--gold);
+            border-color: var(--gold);
+        }
+
+        /* Demo wager modal */
+        .wager-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 400;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background: rgba(2, 6, 23, 0.78);
+            backdrop-filter: blur(8px);
+        }
+
+        .wager-modal.show {
+            display: flex;
+            animation: fadeIn 0.25s ease;
+        }
+
+        .wager-dialog {
+            position: relative;
+            width: min(100%, 430px);
+            padding: 2rem;
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border: 1px solid rgba(251, 191, 36, 0.5);
+            border-radius: 22px;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55), 0 0 35px rgba(251, 191, 36, 0.12);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 0.7rem;
+            right: 0.9rem;
+            width: 2rem;
+            height: 2rem;
+            color: var(--text-muted);
+            background: transparent;
+            border: 0;
+            cursor: pointer;
+            font-size: 1.7rem;
+            line-height: 1;
+        }
+
+        .modal-close:hover,
+        .modal-close:focus-visible { color: var(--gold); }
+
+        .wager-icon {
+            margin-bottom: 0.75rem;
+            color: var(--gold);
+            font-size: 2.3rem;
+            text-align: center;
+            text-shadow: 0 0 20px var(--gold-glow);
+        }
+
+        .wager-dialog h2 {
+            margin-bottom: 0.55rem;
+            color: var(--gold);
+            font: 700 1.35rem 'Orbitron', sans-serif;
+            text-align: center;
+        }
+
+        .wager-note {
+            margin-bottom: 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            text-align: center;
+        }
+
+        .wager-label {
+            display: block;
+            margin-bottom: 0.45rem;
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        .wager-input-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.2rem 0.85rem;
+            background: rgba(2, 6, 23, 0.55);
+            border: 1px solid rgba(251, 191, 36, 0.35);
+            border-radius: 10px;
+        }
+
+        .wager-input-wrap input {
+            width: 100%;
+            padding: 0.7rem 0;
+            color: var(--text-main);
+            background: transparent;
+            border: 0;
+            outline: 0;
+            font: 700 1.25rem 'Orbitron', sans-serif;
+        }
+
+        .wager-input-wrap input::-webkit-inner-spin-button,
+        .wager-input-wrap input::-webkit-outer-spin-button { opacity: 1; }
+        .wager-input-wrap span { color: var(--gold); font-weight: 700; }
+
+        .wager-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-top: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .wager-meta strong { color: var(--text-main); }
+        .wager-meta.potential-win strong { color: var(--success); }
+
+        .wager-error {
+            min-height: 1.3rem;
+            margin-top: 0.9rem;
+            color: var(--danger);
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .wager-actions {
+            display: flex;
+            justify-content: center;
+            gap: 0.8rem;
+            margin-top: 0.8rem;
+        }
+
+        .wager-actions .btn { padding: 0.8rem 1.15rem; font-size: 0.85rem; }
+
         /* Responsive adjustments */
         @media (max-width: 1024px) {
             .hands-grid {
@@ -553,6 +734,11 @@
             .level-cards { grid-template-columns: 1fr; }
             body { padding: 10px; }
             .game-wrapper { padding: 1.5rem; }
+            .demo-wallet { top: 10px; left: 10px; min-width: 165px; }
+            .wallet-label { font-size: 0.62rem; }
+            .wallet-balance { font-size: 0.9rem; }
+            .audio-toggle { top: 10px; right: 10px; }
+            .wager-dialog { padding: 1.6rem; }
         }
 
         @media (max-width: 480px) {

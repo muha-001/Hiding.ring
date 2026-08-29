@@ -15,6 +15,9 @@
         let timerInterval = null;
         let isGameOver = false;
         let audioEnabled = true;
+        let pendingLevel = null;
+        let activeWager = 0;
+        const wallet = new DemoWallet();
 
         // === DOM Elements ===
         const elements = {
@@ -33,7 +36,17 @@
             resultTitle: document.getElementById('resultTitle'),
             resultScore: document.getElementById('resultScore'),
             particleCanvas: document.getElementById('particleCanvas'),
-            audioToggle: document.getElementById('audioToggle')
+            audioToggle: document.getElementById('audioToggle'),
+            walletBalance: document.getElementById('walletBalance'),
+            resetWallet: document.getElementById('resetWallet'),
+            wagerModal: document.getElementById('wagerModal'),
+            wagerInput: document.getElementById('wagerInput'),
+            wagerAvailable: document.getElementById('wagerAvailable'),
+            potentialPayout: document.getElementById('potentialPayout'),
+            wagerError: document.getElementById('wagerError'),
+            confirmWager: document.getElementById('confirmWager'),
+            cancelWager: document.getElementById('cancelWager'),
+            cancelWagerTop: document.getElementById('cancelWagerTop')
         };
 
         // === Audio Engine ===
@@ -122,6 +135,80 @@
             }
         }
 
+        // === Demo USDT Wallet ===
+        function formatUsdt(amount) {
+            return `${Number(amount).toFixed(2)} USDT`;
+        }
+
+        function updateWalletDisplay() {
+            const balance = wallet.getBalance();
+            elements.walletBalance.textContent = formatUsdt(balance);
+            elements.wagerAvailable.textContent = formatUsdt(balance);
+            elements.resetWallet.disabled = activeWager > 0;
+            updatePotentialPayout();
+        }
+
+        function updatePotentialPayout() {
+            const amount = Number.parseFloat(elements.wagerInput.value);
+            elements.potentialPayout.textContent = formatUsdt(
+                Number.isFinite(amount) && amount > 0 ? amount * 2 : 0
+            );
+        }
+
+        function closeWagerModal() {
+            elements.wagerModal.classList.remove('show');
+            elements.wagerModal.setAttribute('aria-hidden', 'true');
+            pendingLevel = null;
+            elements.wagerError.textContent = '';
+        }
+
+        function openWagerModal(level) {
+            pendingLevel = level;
+            elements.wagerInput.value = '1.00';
+            elements.wagerError.textContent = '';
+            updateWalletDisplay();
+            elements.wagerModal.classList.add('show');
+            elements.wagerModal.setAttribute('aria-hidden', 'false');
+            window.setTimeout(() => elements.wagerInput.focus(), 0);
+        }
+
+        function beginDemoWager() {
+            const amount = Number.parseFloat(elements.wagerInput.value);
+            if (!Number.isFinite(amount) || amount < 0.01) {
+                elements.wagerError.textContent = 'Enter a wager of at least 0.01 USDT.';
+                return;
+            }
+            if (!wallet.canPlaceWager(amount)) {
+                elements.wagerError.textContent = 'The wager cannot exceed your demo balance.';
+                return;
+            }
+            const placedAmount = wallet.placeWager(amount);
+            if (!placedAmount) {
+                elements.wagerError.textContent = 'Unable to place this demo wager.';
+                return;
+            }
+            activeWager = placedAmount;
+            const selectedLevel = pendingLevel;
+            closeWagerModal();
+            updateWalletDisplay();
+            startGame(selectedLevel);
+        }
+
+        function settleActiveWager(won) {
+            if (activeWager <= 0) return 0;
+            const wager = activeWager;
+            const payout = wallet.settleWager(wager, won);
+            activeWager = 0;
+            updateWalletDisplay();
+            return payout;
+        }
+
+        function resetDemoWallet() {
+            if (activeWager > 0 || !confirm('Reset your demo wallet to 100.00 USDT?')) return;
+            wallet.reset();
+            updateWalletDisplay();
+        }
+
         // === Particle System ===
         class ParticleSystem {
             constructor() {
@@ -208,6 +295,11 @@
         // === Game Logic ===
         function showLevelScreen() {
             stopTimer();
+            if (activeWager > 0) {
+                wallet.refundWager(activeWager);
+                activeWager = 0;
+                updateWalletDisplay();
+            }
             elements.levelScreen.classList.remove('hidden');
             elements.resultOverlay.classList.remove('show');
             elements.btnLock.style.display = 'flex';
@@ -221,6 +313,11 @@
         }
 
         function startGame(level) {
+            if (activeWager <= 0) {
+                openWagerModal(level);
+                return;
+            }
+
             audio.init();
             audio.resume();
             audio.playClick();
@@ -423,6 +520,7 @@
                 const timeBonus = LEVELS[currentLevel].time ? timeLeft * 10 : 500;
                 const eliminationBonus = eliminatedHands.length * 50;
                 const finalScore = score + timeBonus + eliminationBonus;
+                const payout = settleActiveWager(true);
                 
                 audio.playWin();
                 particles.createConfetti();
@@ -430,10 +528,11 @@
                 document.body.style.animation = 'shake 0.5s';
                 setTimeout(() => document.body.style.animation = '', 500);
                 
-                showResult(true, 'VICTORY!', `Final Score: ${finalScore}`);
+                showResult(true, 'VICTORY!', `Final Score: ${finalScore} · Demo return: ${formatUsdt(payout)}`);
             } else {
+                settleActiveWager(false);
                 audio.playLose();
-                showResult(false, 'DEFEAT!', 'Better luck next time');
+                showResult(false, 'DEFEAT!', 'Better luck next time · Demo wager lost');
             }
             
             elements.btnLock.style.display = 'none';
@@ -444,7 +543,11 @@
         function gameOver(win, message) {
             isGameOver = true;
             stopTimer();
-            showResult(win, win ? 'VICTORY!' : 'GAME OVER', message);
+            const payout = settleActiveWager(win);
+            const settlementMessage = win && payout > 0
+                ? `${message} · Demo return: ${formatUsdt(payout)}`
+                : `${message} · Demo wager lost`;
+            showResult(win, win ? 'VICTORY!' : 'GAME OVER', settlementMessage);
             elements.btnLock.style.display = 'none';
             elements.btnEliminate.style.display = 'none';
             elements.btnReveal.style.display = 'none';
@@ -470,6 +573,19 @@
         // Initialize
         window.onload = () => {
             showLevelScreen();
+            updateWalletDisplay();
+            elements.wagerInput.addEventListener('input', updatePotentialPayout);
+            elements.confirmWager.addEventListener('click', beginDemoWager);
+            elements.cancelWager.addEventListener('click', closeWagerModal);
+            elements.cancelWagerTop.addEventListener('click', closeWagerModal);
+            elements.resetWallet.addEventListener('click', resetDemoWallet);
+            elements.wagerModal.addEventListener('click', (event) => {
+                if (event.target === elements.wagerModal) closeWagerModal();
+            });
+            elements.wagerInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') beginDemoWager();
+                if (event.key === 'Escape') closeWagerModal();
+            });
         };
 
 // Centralized event binding: behavior is identical to the original inline handlers.
